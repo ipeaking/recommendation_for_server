@@ -23,34 +23,27 @@
 #     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #
 #               佛祖保佑         永无BUG
-# @Time    : 2020-08-23 10:05
+# @Time    : 2020-09-12 10:58
 # @Author  : Hongbo Huang
-# @File    : test_page.py
-import sys
-sys.path.append('..')
-from dao import redis_db
-import json
+# @File    : kafka_producer.py
+from kafka import KafkaProducer
+from kafka.errors import KafkaError
+import time
 
-class PageSize(object):
-    def __init__(self):
-        self._redis = redis_db.Redis()
 
-    def get_data_with_page(self, page, page_size):
-        #1   1~10
-        #2   11~20
-        #3   21~30
-        start = (page - 1) * page_size
-        end = start + page_size
-        data = self._redis.redis.zrange("rec_list", start, end)
-        lst = list()
-        for x in data:
-            info = self._redis.redis.get("news_detail:" + x)
-            lst.append(info)
-        return lst
+def main(topic, msg):
+    producer = KafkaProducer(bootstrap_servers=["localhost:9092"])
+    t = time.time()
+    for i in range(10):
+        future = producer.send(topic, msg)
+        try:
+            record_metadata = future.get(timeout=10)
+            print(record_metadata)
+        except KafkaError as e:
+            print(e)
+
+    print(time.time() - t)
 
 
 if __name__ == '__main__':
-    page_size = PageSize()
-    # page_size.modify_article_detail()
-    # print(page_size.get_data_with_page(1, 20))
-
+    main("recommendation", b"hello")

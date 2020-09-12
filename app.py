@@ -11,7 +11,7 @@ from service.LogData import LogData
 log_data = LogData()
 from service.test_page import PageSize
 page_query = PageSize()
-
+from kafka_service import kafka_producer
 
 @app.route("/recommendation/get_rec_list", methods=['POST'])
 def get_rec_list():
@@ -95,10 +95,36 @@ def likes():
         mysql = Mysql()
         sess = mysql._DBSession()
         if sess.query(User.id).filter(User.id == user_id).count() > 0:
-            if log_data.insert_log(user_id, content_id, title, "likes"):
+            if log_data.insert_log(user_id, content_id, title, "likes") \
+                    and log_data.modify_article_detail("news_detail:" + content_id, "likes"):
+                kafka_producer.main("recommendation", content_id + ":likes")
                 return jsonify({"code": 0, "msg": "点赞成功"})
             else:
                 return jsonify({"code": 1001, "msg": "点赞失败"})
+        else:
+            return jsonify({"code": 1000, "msg": "用户名不存在"})
+
+    except Exception as e:
+        return jsonify({"code": 2000, "msg": "error"})
+
+
+@app.route("/recommendation/read", methods=['POST'])
+def read():
+    if request.method == 'POST':
+        req_json = request.get_data()
+        rec_obj = json.loads(req_json)
+        user_id = rec_obj['user_id']
+        content_id = rec_obj['content_id']
+        title = rec_obj['title']
+    try:
+        mysql = Mysql()
+        sess = mysql._DBSession()
+        if sess.query(User.id).filter(User.id == user_id).count() > 0:
+            if log_data.insert_log(user_id, content_id, title, "read") \
+                    and log_data.modify_article_detail("news_detail:" + content_id, "read"):
+                return jsonify({"code": 0, "msg": "阅读成功"})
+            else:
+                return jsonify({"code": 1001, "msg": "阅读失败"})
         else:
             return jsonify({"code": 1000, "msg": "用户名不存在"})
 
@@ -118,7 +144,8 @@ def collections():
         mysql = Mysql()
         sess = mysql._DBSession()
         if sess.query(User.id).filter(User.id == user_id).count() > 0:
-            if log_data.insert_log(user_id, content_id, title, "collections"):
+            if log_data.insert_log(user_id, content_id, title, "collections") \
+                    and log_data.modify_article_detail("news_detail:" + content_id, "collections"):
                 return jsonify({"code": 0, "msg": "收藏成功"})
             else:
                 return jsonify({"code": 1001, "msg": "收藏失败"})
@@ -158,6 +185,7 @@ def getCollections():
     except Exception as e:
         print(e)
         return jsonify({"code": 2000, "msg": "error"})
+
 
 
 if __name__ == '__main__':
