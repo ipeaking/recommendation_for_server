@@ -32,12 +32,12 @@ import time
 
 
 def main(topic, msg):
-    producer = KafkaProducer(bootstrap_servers=["localhost:9092"])
+    producer = KafkaProducer(bootstrap_servers=["localhost:9092"])     #生成者
     t = time.time()
     for i in range(10):
-        future = producer.send(topic, msg)
+        future = producer.send(topic, msg)       #发送主题和信息
         try:
-            record_metadata = future.get(timeout=10)
+            record_metadata = future.get(timeout=10) #每隔10S发送一次数据   
             print(record_metadata)
         except KafkaError as e:
             print(e)

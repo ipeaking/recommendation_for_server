@@ -6,7 +6,7 @@ from dao.mysql_db import Mysql
 
 Base = declarative_base()
 class User(Base):
-    __tablename__ = 'User'
+    __tablename__ = 'User'  #定义表名
     id = Column(Integer(), primary_key=True)
     username = Column(String(20))
     password = Column(String(500))
@@ -18,5 +18,5 @@ class User(Base):
     def __init__(self):
         mysql = Mysql()
         engine = mysql.engine
-        Base.metadata.create_all(engine)
+        Base.metadata.create_all(engine)   #加载引擎
         print('aaaaaaaa')

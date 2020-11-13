@@ -33,7 +33,7 @@ import json
 
 class PageSize(object):
     def __init__(self):
-        self._redis = redis_db.Redis()
+        self._redis = redis_db.Redis()   # 表示受保护的方法，开发者不想让你用，但是你非要用也可以
 
     def get_data_with_page(self, page, page_size):
         #1   1~10
@@ -41,7 +41,7 @@ class PageSize(object):
         #3   21~30
         start = (page - 1) * page_size
         end = start + page_size
-        data = self._redis.redis.zrange("rec_list", start, end)
+        data = self._redis.redis.zrange("rec_list", start, end)   #Redis Zrange 返回有序集中，指定区间内的成员
         lst = list()
         for x in data:
             info = self._redis.redis.get("news_detail:" + x)

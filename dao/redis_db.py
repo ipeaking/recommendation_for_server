@@ -28,7 +28,7 @@
 # @File    : redis_db.py
 import redis
 
-
+# StrictRedis用于实现大部分官方的命令,并使用官方的语法和命令
 class Redis(object):
     def __init__(self):
         self.redis = redis.StrictRedis(host='r-m5e8kd481g3boqztfhpd.redis.rds.aliyuncs.com',
